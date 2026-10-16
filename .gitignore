@@ -18,3 +18,6 @@ __pycache__/
 *.npz
 *.mp4
 *.wav
+
+# autoresearch loop log (program.md): must survive git reset --hard
+results.tsv
