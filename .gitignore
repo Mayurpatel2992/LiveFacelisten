@@ -1,16 +1,20 @@
+# data, runs and third-party code (datasets/ alone is ~148 GB)
 datasets/
 outputs/
 results/
 deps/
+logs.*
 __pycache__/
+*.ckpt
+*.npy
+
+# kept from the earlier .gitignore: weights, media, logs (e.g. the loop's run.log)
 *.pyc
 *.log
 *.out
 *.pt
 *.pth
-*.ckpt
 *.safetensors
-*.npy
 *.npz
 *.mp4
 *.wav
