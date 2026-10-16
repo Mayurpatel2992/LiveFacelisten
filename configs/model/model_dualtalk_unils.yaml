@@ -1,0 +1,26 @@
+# Listen+speak Option A (UniLS-style): the DualTalk speaking model + two causal
+# cross-attention blocks per backbone layer (own / partner audio), LoRA on
+# self-attention and FFN. Starts exactly at the speaking model (zero-init).
+defaults:
+  - model_dualtalk_speak
+  - _self_
+
+modelname: DualTalk_UniLS_OptionA
+_target_: framework.model.model_dualtalk_unils.DualTalkUniLS
+
+duplex:
+  speak_ckpt_path: ???        # trained model_dualtalk_speak checkpoint
+  lora_rank: 16
+  lora_alpha: 16
+  cross_attn_window: 0        # 0 = all past audio tokens (clips <= 30 s)
+  train_heads: true           # fine-tune AR code heads + flow head
+
+# Fine-tuning a model that already went through these schedules:
+# run them from step 0 instead of re-warming.
+scheduled_sampling:
+  start_epoch: -1
+  end_epoch: 0
+uncertainty_masking:
+  start_epoch: 0
+loss:
+  flow_warmup_steps: 0

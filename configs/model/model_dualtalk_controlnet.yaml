@@ -1,0 +1,23 @@
+# Listen+speak Option B (ControlNet): frozen DualTalk speaking model (own track)
+# + trainable copy of its backbone driven by the partner track, zero-init
+# connections into every block, gated by an own-voice classifier.
+defaults:
+  - model_dualtalk_speak
+  - _self_
+
+modelname: DualTalk_ControlNet_OptionB
+_target_: framework.model.model_dualtalk_controlnet.DualTalkControlNet
+
+duplex:
+  speak_ckpt_path: ???        # trained model_dualtalk_speak checkpoint
+  gate_train_source: vad      # teacher-forced switch from the own-track VAD
+  gate_infer_source: pred     # deployable: own-voice classifier (vad = oracle, ones = no gate)
+  lambda_gate: 0.1            # BCE weight of the own-voice classifier
+
+scheduled_sampling:
+  start_epoch: -1
+  end_epoch: 0
+uncertainty_masking:
+  start_epoch: 0
+loss:
+  flow_warmup_steps: 0

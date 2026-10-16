@@ -1,0 +1,27 @@
+data_name: DualTalk
+_target_: framework.data.dualtalk.DualTalkDataModule
+
+# HF ZiqiaoPeng/DualTalk_Dataset, unzipped; splits + VAD from
+# pre_process/dualtalk_prepare.py. Every track (speaker1 / speaker2) is an item.
+raw_path: ${path.datasets}/dualtalk/raw
+split_path: ${path.datasets}/dualtalk/splits
+vad_path: ${path.datasets}/dualtalk/vad
+
+# Stage 1: motion only (full tracks, <= 750 frames)
+load_audio: false
+
+# min-max scaling ranges (DualTalk train 0.1..99.9 percentiles, rounded out)
+exp_range: [-4.5, 4.5]
+jaw_range: [-0.2, 0.4]
+
+# Machine
+batch_size: ${machine.batch_size}
+num_workers: ${machine.num_workers}
+
+video_framerate: 25
+progress_bar: true
+tiny: false
+debug: false
+
+# no identity / emotion labels in DualTalk: a single constant style slot
+one_hot_dim: [1]

@@ -1,0 +1,16 @@
+datasets/
+outputs/
+results/
+deps/
+__pycache__/
+*.pyc
+*.log
+*.out
+*.pt
+*.pth
+*.ckpt
+*.safetensors
+*.npy
+*.npz
+*.mp4
+*.wav

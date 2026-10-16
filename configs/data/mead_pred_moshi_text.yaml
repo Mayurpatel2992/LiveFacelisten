@@ -1,0 +1,38 @@
+data_name: MEAD
+_target_: framework.data.mead.MeadDataModule
+
+# Paths -- identical to configs/data/mead_pred.yaml (same dataset, same splits).
+motion_path: ${path.datasets}/mead/param
+audio_path: ${path.datasets}/mead/wav
+split_path: ${path.datasets}/mead-splits-pred
+prosody_path: ${path.datasets}/mead/prosody_static
+
+load_audio: true
+
+# MIBURI-style Moshi/Mimi conditioning: additively load precomputed Mimi RVQ
+# code streams (see pre_process/precompute_mimi_codes.py). The raw waveform and
+# every other field are still loaded, so the HuBERT path is unchanged.
+load_mimi_codes: true
+mimi_codes_path: ${path.datasets}/mead/mimi_codes
+
+# MIBURI text conditioning: precomputed 12.5 Hz interleaved Moshi text-token
+# stream, built with the vendored Moshi Inner-Monologue interleaver
+# (see pre_process/precompute_moshi_text_tokens.py). Same 12.5 Hz grid and
+# length as the Mimi codes above.
+load_moshi_text_codes: true
+moshi_text_codes_path: ${path.datasets}/mead/moshi_text_codes
+
+# Machine
+batch_size: ${machine.batch_size}
+num_workers: ${machine.num_workers}
+
+# Motion
+video_framerate: 25
+
+# Other
+progress_bar: true
+tiny: false
+debug: false
+
+# One-hot encoding
+one_hot_dim: [32, 8, 3]  # total number of identities, emotions, intensities

@@ -1,0 +1,4 @@
+_target_: pytorch_lightning.loggers.tensorboard.TensorBoardLogger
+save_dir: ${path.working_dir}
+name: tensorboard
+version: ${run_id}

@@ -1,0 +1,30 @@
+# Experiment 6 -- liveface_hubert_moshi_text
+# HuBERT-xlarge 2560-D  ++  [ Mimi audio -> Moshi emb[:8] 4096-D  concat  Moshi
+# Inner-Monologue text -> Moshi text_emb 4096-D ]  ->  audio_dim = 10752.
+#
+# Clean test of "does the transcript/text stream add signal when the model
+# already has HuBERT's continuous features?".  The HuBERT path is UNCHANGED from
+# the baseline; both copied Moshi tables (emb[:8] AND text_emb) are FROZEN so the
+# only new signal is the text stream -- no confound with 198M trainable
+# embedding params (cf. Experiment 5, which showed trainable tables collapse
+# sample diversity).  Mimi frozen (codes precomputed).  Stage-1 frozen.
+#
+# Needs data=mead_pred_moshi_text and a working `transformers`
+# (pip install "huggingface_hub==0.19.4").
+defaults:
+  - model_vqvae_arflow_pred
+  - _self_
+
+arflow:
+  audio_conditioning: hubert_moshi     # HuBERT ++ (Moshi audio concat Moshi text)
+  moshi_embedding_trainable: false
+  moshi_emb_path: ${path.datasets}/moshi_audio_emb.pt
+  moshi_num_codebooks: 8
+  moshi_feature_norm: layernorm        # non-affine LN on the summed emb
+  moshi_align_train: interp            # offline 12.5->25 Hz resample: 'interp' | 'hold'
+
+  moshi_use_text: true
+  moshi_text_emb_path: ${path.datasets}/moshi_text_emb.pt
+  moshi_text_emb_trainable: false
+  moshi_text_feature_norm: layernorm   # non-affine LN on the text emb (scale parity)
+  moshi_text_fuse: concat             # 'concat' (4096+4096 -> 8192) | 'sum' (-> 4096)

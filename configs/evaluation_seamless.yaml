@@ -1,0 +1,29 @@
+hydra:
+  run:
+    dir: .
+  output_subdir: null
+
+seed: 1234
+logger_level: INFO
+
+folder: ???                 # run folder, e.g. outputs/Seamless/seamless_controlnet/<id>
+ckpt: latest                # 'latest' = final latest-epoch=*.ckpt (fixed budget, as FacePlex / UniLS),
+                            # 'best' = best-epoch=*.ckpt, or a path
+split: test                 # test | val
+number_of_samples: 1        # >1 also saves <key>_s<k>.npy
+sampling_steps: null        # flow ODE steps (null = the model's)
+gate: null                  # Option B only: pred | vad | ones (null = the model's gate_infer_source)
+device: 0
+shard: 0                    # generate tracks shard::num_shards (one process per GPU)
+num_shards: 1
+max_tracks: null            # debug: stop after this many tracks
+pairs: null                 # JSON {"pairs": [[trackA, trackB, n], ...]}: only these pairs of the split
+                            # (autoresearch/val300.json = the fixed autoresearch benchmark pairs)
+token_temperature: null     # AR code sampling temperature (null = the model's; 0 = argmax)
+tag: ""                     # suffix for the output folder, e.g. _ep99
+
+defaults:
+  - /path@path
+  - override hydra/job_logging: rich
+  - override hydra/hydra_logging: rich
+  - _self_

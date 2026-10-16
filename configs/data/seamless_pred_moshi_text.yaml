@@ -1,0 +1,26 @@
+data_name: Seamless
+_target_: framework.data.seamless.SeamlessDataModule
+
+# Same tracks / splits / scaling as configs/data/seamless_prior.yaml.
+root: ${path.datasets}/seamless
+
+# Stage 2: Moshi conditioning (no waveform, no prosody); packed by
+# pre_process/seamless_pack_codes.py
+load_audio: true
+load_mimi_codes: true
+load_moshi_text_codes: true
+
+# Partner (other speaker) streams + VAD: needed by the listen+speak models
+# (Option A / B); the speaking-only model leaves them off.
+load_partner: false
+
+# Machine
+batch_size: ${machine.batch_size}
+num_workers: ${machine.num_workers}
+
+video_framerate: 25
+progress_bar: true
+tiny: false
+debug: false
+
+one_hot_dim: [1]

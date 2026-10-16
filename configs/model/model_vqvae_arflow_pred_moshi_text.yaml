@@ -1,0 +1,28 @@
+# Experiment 4 -- liveface_moshi_text_frozen
+# MIBURI-style dual conditioning:
+#   Mimi RVQ codes      -> sum(Moshi emb[:8])  -> 4096-D   (audio)
+#   Inner-Monologue text -> Moshi text_emb     -> 4096-D   (text)
+#   concat -> 8192-D audio conditioning (replaces the baseline HuBERT feature).
+# Text tokens follow Moshi's Inner-Monologue alignment exactly (vendored
+# interleaver, text_padding=3 / end_of_text_padding=0 / zero_padding=-1,
+# keep_main_only=True, audio_delay=0). Mimi frozen (codes precomputed).
+# Moshi emb[:8] FROZEN, Moshi text_emb FROZEN. Stage-1 frozen. Everything else
+# inherited verbatim from model_vqvae_arflow_pred.yaml, so the ONLY independent
+# variable vs Experiment 1 (moshi_frozen) is the added text stream.
+defaults:
+  - model_vqvae_arflow_pred
+  - _self_
+
+arflow:
+  audio_conditioning: moshi            # hubert | moshi | hubert_moshi
+  moshi_embedding_trainable: false
+  moshi_emb_path: ${path.datasets}/moshi_audio_emb.pt
+  moshi_num_codebooks: 8
+  moshi_feature_norm: layernorm        # non-affine LN on the summed emb
+  moshi_align_train: interp            # offline 12.5->25 Hz resample: 'interp' | 'hold'
+
+  moshi_use_text: true
+  moshi_text_emb_path: ${path.datasets}/moshi_text_emb.pt
+  moshi_text_emb_trainable: false
+  moshi_text_feature_norm: layernorm   # non-affine LN on the text emb (scale parity with audio)
+  moshi_text_fuse: concat             # 'concat' (4096+4096 -> 8192) | 'sum' (-> 4096)

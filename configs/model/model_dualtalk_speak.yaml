@@ -1,0 +1,12 @@
+# Listen+speak, step 2: DualTalk speaking model (the frozen main branch of
+# Option B and the starting point of Option A).
+# Exp-5 recipe (Mimi codes -> sum(Moshi emb[:8]) concat Inner-Monologue text ->
+# Moshi text_emb, both tables trainable) on the agent's OWN track only; trained
+# on all of its frames (speaking and listening). Stage-1 = DualTalk VQ-VAE.
+defaults:
+  - model_vqvae_arflow_pred_moshi_text_trainable
+  - _self_
+
+arflow:
+  use_prosody: false        # whole-clip DisVoice prosody is not causal
+  style_mode: constant      # DualTalk has no identity / emotion labels

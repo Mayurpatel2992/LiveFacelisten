@@ -1,0 +1,23 @@
+# Experiment 5 -- liveface_moshi_text_trainable
+# Same dual conditioning as Experiment 4 (Mimi codes -> sum(Moshi emb[:8]) 4096-D
+# concat Inner-Monologue text -> Moshi text_emb 4096-D), but BOTH copied Moshi
+# tables (emb[:8] and text_emb) are TRAINABLE and adapt to MEAD facial motion --
+# matching the released MIBURI behaviour (textaudio_emb_freeze=False).
+# Mimi frozen (codes precomputed). Stage-1 frozen.
+defaults:
+  - model_vqvae_arflow_pred
+  - _self_
+
+arflow:
+  audio_conditioning: moshi            # hubert | moshi | hubert_moshi
+  moshi_embedding_trainable: true
+  moshi_emb_path: ${path.datasets}/moshi_audio_emb.pt
+  moshi_num_codebooks: 8
+  moshi_feature_norm: layernorm        # non-affine LN on the summed emb
+  moshi_align_train: interp            # offline 12.5->25 Hz resample: 'interp' | 'hold'
+
+  moshi_use_text: true
+  moshi_text_emb_path: ${path.datasets}/moshi_text_emb.pt
+  moshi_text_emb_trainable: true
+  moshi_text_feature_norm: layernorm   # non-affine LN on the text emb (scale parity with audio)
+  moshi_text_fuse: concat             # 'concat' (4096+4096 -> 8192) | 'sum' (-> 4096)

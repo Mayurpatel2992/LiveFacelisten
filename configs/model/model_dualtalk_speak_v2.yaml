@@ -1,0 +1,25 @@
+# DualTalk speaking model v2 (2026-10-14). Same as model_dualtalk_speak, plus
+# fixes for the free-run collapse of 2uxmfnxt (teacher-forced FD 8 vs free-run 43-54):
+#  - stronger, earlier scheduled sampling (own predicted codes as history)
+#  - speaking frames weighted 2x in training (own-track VAD)
+#  - sampled codes (temperature 1.0) in free-run validation / inference, more val clips
+defaults:
+  - model_dualtalk_speak
+  - _self_
+
+arflow:
+  infer_token_temperature: 1.0
+
+scheduled_sampling:
+  enable: true
+  start_epoch: 5
+  end_epoch: 60
+  max_prob: 0.6
+
+loss:
+  speak_weight: 2.0
+
+free_run_validation:
+  batches: 32
+  max_frames: 96
+  seed: 1234

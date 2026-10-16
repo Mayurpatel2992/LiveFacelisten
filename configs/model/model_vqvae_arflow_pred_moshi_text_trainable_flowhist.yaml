@@ -1,0 +1,15 @@
+# Experiment 5 + flow-head motion history -- liveface_moshi_text_trainable_flowhist
+# Identical to model_vqvae_arflow_pred_moshi_text_trainable (Mimi audio + Moshi
+# text, both tables trainable) except the per-frame flow head also sees the
+# previous K clean motion latents z0_{t-1..t-K} (+ a validity flag per frame).
+# Training: shifted ground-truth z0 + per-sequence Gaussian noise + per-frame
+# dropout (exposure-bias guards). Inference: the head's own z0_hat outputs.
+defaults:
+  - model_vqvae_arflow_pred_moshi_text_trainable
+  - _self_
+
+arflow:
+  flow_history_frames: 2         # K: 0 = off (baseline) | 1 | 2 | 4
+  flow_history_mode: cond        # 'cond' (concat with t/audio/ẑ_t/h_t) | 'input' (added to noisy z_t)
+  flow_history_noise_std: 0.1    # per-sequence std ~ U(0, 0.1); codebook latent per-dim std is ~0.22
+  flow_history_dropout: 0.1      # per-frame prob. of marking a history frame invalid

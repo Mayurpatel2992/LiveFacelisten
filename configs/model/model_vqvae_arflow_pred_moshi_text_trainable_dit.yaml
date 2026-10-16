@@ -1,0 +1,20 @@
+# Experiment 5 + DiT flow head -- liveface_moshi_text_trainable_dit
+# Identical to model_vqvae_arflow_pred_moshi_text_trainable (Mimi audio + Moshi
+# text, both tables trainable, no flow-head history) except the per-frame
+# 4-layer concat MLP flow head is replaced by a small diffusion transformer with
+# in-context conditioning over the frame's tokens:
+#   [t_emb] [audio a_t] [ẑ_t] [h_t] [noisy z_t]
+# velocity read from the noisy-z_t position. Model code lives in
+# framework/model/model_vqvae_arflow_pred_dit.py (MLP-head file untouched).
+defaults:
+  - model_vqvae_arflow_pred_moshi_text_trainable
+  - _self_
+
+modelname: ProbTalk3D_ARFlowDiTHead
+_target_: framework.model.model_vqvae_arflow_pred_dit.VqvaeARFlowDiTPredict
+
+arflow:
+  dit_dim: 256
+  dit_layers: 3        # 2-4 per the plan
+  dit_heads: 4
+  dit_ffn_dim: 1024

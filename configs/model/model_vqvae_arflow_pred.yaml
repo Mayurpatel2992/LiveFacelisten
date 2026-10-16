@@ -1,0 +1,89 @@
+modelname: ProbTalk3D_ARFlowHead
+_target_: framework.model.model_vqvae_arflow_pred.VqvaeARFlowPredict
+
+# flag (picked up by train_all.py loss-monitor selection)
+vqvae_arflow_pred: true
+
+folder_prior: ???
+version_prior: ???
+ckpt_path_prior: ${get_last_checkpoint:${.folder_prior},${.version_prior},${ckpt_name}}
+
+working_dir: ${path.working_dir}
+
+seed: ${seed}
+video_framerate: ${data.video_framerate}
+crop_length: 96
+
+# Autoregressive backbone + heads
+arflow:
+  d_model: 256
+  num_layers: 6          # causal AR backbone depth
+  num_heads: 8
+  ffn_dim: 1024
+  dropout: 0.0
+  # causal audio encoder
+  audio_layers: 2
+  audio_kernel: 5
+  # flow head
+  # Inputs to the flow-matching head: audio token a_t, noisy motion token z_t,
+  # quantized AR token ẑ_t, timestamp t_d, + the backbone hidden h_t.
+  # Finding 3: the flow head is strictly per-frame (no temporal mixing), so h_t
+  # is the ONLY causal temporal context it can see -> keep this on.
+  time_dim: 256
+  flow_hidden_dim: 512
+  audio_proj_dim: 256
+  flow_use_hidden: true
+  # Finding 2: mild random history dropout during training (LiveGesture-style),
+  # applied on top of the (now much milder) uncertainty masking below.
+  history_dropout: 0.15
+  # sampling
+  sampling_steps: 10           # flow ODE steps per frame (reduce for real-time)
+  train_token_temperature: 1.0 # straight-through Gumbel temperature
+  infer_token_temperature: 0.0 # 0 => categorical argmax; >0 => sampled
+  # streaming: sliding-window size (frames) for the causal Stage-1 decoder.
+  # 0 decodes the full prefix.
+  stream_decode_window: 64
+
+# Scheduled sampling (teacher-forcing -> own predictions) to cut exposure bias.
+# Gradually expose the model to its own discrete predictions.  The replacement
+# applies to valid history tokens including frame 0, because predicted frame 0
+# is exactly what inference feeds into the frame-1 prediction.
+scheduled_sampling:
+  enable: true
+  start_epoch: 20
+  end_epoch: 120
+  max_prob: 0.25
+
+# Uncertainty masking (training-only two-pass scheme). Pass-1 scores per-frame
+# uncertainty as normalized categorical entropy; pass-2 replaces the few most-
+# uncertain valid history sub-codes with learned mask embeddings and re-runs.
+# Finding 2: keep it MILD and start it LATE so the backbone still gets a mostly
+# clean teacher signal and does not learn to ignore motion history.
+uncertainty_masking:
+  enable: true
+  mask_ratio: 0.15         # fraction per sub-code of valid history to mask
+  start_epoch: 40          # epoch at which masking kicks in (was 20)
+  infer_mask_ratio: 0.0    # inference mask ratio (0.0=off, 0.1/0.3/0.5 for experiments)
+
+# Loss weights (categorical AR vs flow; every term is feature-mean normalized)
+loss:
+  lambda_ar: 1.0           # categorical codebook cross-entropy
+  lambda_flow: 1.0
+  lambda_lat: 0.1
+  lambda_exp: 0.15
+  lambda_jaw: 0.1
+  exp_dims: 50             # motion[..., :exp_dims] -> exp loss, the rest -> jaw loss (Seamless: 100)
+  flow_warmup_steps: 2000
+
+# Teacher-forced validation hides exposure bias. These deterministic, genuinely
+# free-running batches use the same cached feedback loop as deployment.
+free_run_validation:
+  batches: 4
+  max_frames: 96
+  seed: 1234
+
+defaults:
+  - feature_extractor: hubert_causal
+  - optim: adam_diffusion
+  - /model/model_vqvae_prior@motion_prior
+  - /model/losses/function/l1@func_recons

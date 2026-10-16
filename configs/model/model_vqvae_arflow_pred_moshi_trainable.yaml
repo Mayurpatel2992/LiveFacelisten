@@ -1,0 +1,16 @@
+# Experiment 3 -- liveface_moshi_trainable
+# Same as Experiment 1 (Mimi codes -> sum(Moshi emb[:8]) -> 4096-D) but the
+# copied Moshi emb[:8] tables are TRAINABLE and adapt to MEAD facial motion,
+# matching the released MIBURI behaviour (textaudio_emb_freeze=False).
+# Mimi frozen (codes precomputed). Stage-1 frozen.
+defaults:
+  - model_vqvae_arflow_pred
+  - _self_
+
+arflow:
+  audio_conditioning: moshi            # hubert | moshi | hubert_moshi
+  moshi_embedding_trainable: true
+  moshi_emb_path: ${path.datasets}/moshi_audio_emb.pt
+  moshi_num_codebooks: 8
+  moshi_feature_norm: layernorm        # non-affine LN on the summed emb (~0.02 std -> ~unit); 'none' to ablate
+  moshi_align_train: interp            # offline 12.5->25 Hz resample: 'interp' (smooth) | 'hold' (causal step)

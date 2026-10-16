@@ -1,0 +1,39 @@
+modelname: ProbTalk3D_DiffusionHead
+_target_: framework.model.model_vqvae_diffusion_pred.VqvaeDiffusionPredict
+
+# flag
+vqvae_diffusion_pred: true
+
+folder_prior: ???
+version_prior: ???
+ckpt_path_prior: ${get_last_checkpoint:${.folder_prior},${.version_prior},${ckpt_name}}
+
+working_dir: ${path.working_dir}
+
+seed: ${seed}
+video_framerate: ${data.video_framerate}
+crop_length: 96
+
+# Flow matching config
+diffusion:
+  latent_dim: 256
+  cond_dim: 256
+  time_dim: 256
+  hidden_dim: 512
+  sampling_steps: 10
+  gumbel_temperature: 1.0
+  audio_proj_dim: 256
+
+# Loss weights
+loss:
+  lambda_diff: 1.0
+  lambda_lat: 0.1
+  lambda_exp: 0.15
+  lambda_jaw: 0.1
+
+defaults:
+  - feature_extractor: hubert
+  - feature_predictor: transformer_pred
+  - optim: adam_diffusion
+  - /model/model_vqvae_prior@motion_prior
+  - /model/losses/function/l1@func_recons

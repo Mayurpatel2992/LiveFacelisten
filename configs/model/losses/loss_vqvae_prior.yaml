@@ -1,0 +1,22 @@
+_target_: framework.model.losses.compute_vqvae_prior.ComputeLosses
+
+## Loss terms
+# Quantization loss
+lmd_quant: 1.5
+quant: ${.lmd_quant}
+
+# Reconstruction losses
+lmd_exp_recons: 0.5
+recons_exp: ${.lmd_exp_recons}
+recons_exp_func: ${model.func_recons}
+
+lmd_jaw_recons: 0.1
+recons_jaw: ${.lmd_jaw_recons}
+recons_jaw_func: ${model.func_recons}
+
+# motion[..., :exp_dims] -> recons_exp, the rest -> recons_jaw (Seamless 108-D: 100)
+exp_dims: 50
+
+
+
+

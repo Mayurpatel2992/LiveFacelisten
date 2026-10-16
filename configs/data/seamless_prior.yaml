@@ -1,0 +1,21 @@
+data_name: Seamless
+_target_: framework.data.seamless.SeamlessDataModule
+
+# UniLS-Talk Seamless Interaction, packed by pre_process/seamless_prepare.py.
+# Every track (A / B of a pair) is an item; 108-D motion, per-dim min-max (norm.json).
+root: ${path.datasets}/seamless
+
+# Stage 1: motion only (whole 2-16 s windows)
+load_audio: false
+
+# Machine
+batch_size: ${machine.batch_size}
+num_workers: ${machine.num_workers}
+
+video_framerate: 25
+progress_bar: true
+tiny: false
+debug: false
+
+# no identity / emotion labels: a single constant style slot
+one_hot_dim: [1]

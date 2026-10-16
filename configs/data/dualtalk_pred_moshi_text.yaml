@@ -1,0 +1,31 @@
+data_name: DualTalk
+_target_: framework.data.dualtalk.DualTalkDataModule
+
+# Same tracks / splits / scaling as configs/data/dualtalk_prior.yaml.
+raw_path: ${path.datasets}/dualtalk/raw
+split_path: ${path.datasets}/dualtalk/splits
+vad_path: ${path.datasets}/dualtalk/vad
+exp_range: [-4.5, 4.5]
+jaw_range: [-0.2, 0.4]
+
+# Stage 2: Moshi conditioning (no waveform, no prosody)
+load_audio: true
+load_mimi_codes: true
+mimi_codes_path: ${path.datasets}/dualtalk/mimi_codes          # pre_process/dualtalk_mimi_codes.py
+load_moshi_text_codes: true
+moshi_text_codes_path: ${path.datasets}/dualtalk/moshi_text_codes   # pre_process/dualtalk_text_tokens.py
+
+# Partner (other speaker) streams + VAD: needed by the listen+speak models
+# (Option A / B); the speaking-only model leaves them off.
+load_partner: false
+
+# Machine
+batch_size: ${machine.batch_size}
+num_workers: ${machine.num_workers}
+
+video_framerate: 25
+progress_bar: true
+tiny: false
+debug: false
+
+one_hot_dim: [1]

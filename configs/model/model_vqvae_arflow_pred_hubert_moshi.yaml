@@ -1,0 +1,16 @@
+# Experiment 2 -- liveface_hubert_moshi
+# concat[ HuBERT-xlarge frame-paired 2560-D , sum(Moshi emb[:8]) 4096-D ] -> 6656-D.
+# HuBERT path UNCHANGED from the baseline (same feature_extractor: hubert_causal,
+# same finetune schedule). Mimi frozen (codes precomputed). Moshi emb[:8] FROZEN.
+# Stage-1 frozen. Only the audio representation differs from the baseline.
+defaults:
+  - model_vqvae_arflow_pred
+  - _self_
+
+arflow:
+  audio_conditioning: hubert_moshi     # hubert | moshi | hubert_moshi
+  moshi_embedding_trainable: false
+  moshi_emb_path: ${path.datasets}/moshi_audio_emb.pt
+  moshi_num_codebooks: 8
+  moshi_feature_norm: layernorm        # non-affine LN on the summed emb (~0.02 std -> ~unit); 'none' to ablate
+  moshi_align_train: interp            # offline 12.5->25 Hz resample: 'interp' (smooth) | 'hold' (causal step)
